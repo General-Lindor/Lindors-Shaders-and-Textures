@@ -1,0 +1,83 @@
+--------------------------------------------------------------------------------------------------------------------------------
+--SHADER COLLECTIONS------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------
+
+obj_fx_twings_for_mystique = {
+  diffusePnt    = "null.shader",
+  diffusePntShd = "null.shader",
+  z             = "null.shader",
+  shadowmap     = "null.shader",
+  cubeshadowmap = "null.shader",
+  ambDiff       = "object/fx/add-t-energy.shader",
+}
+
+--------------------------------------------------------------------------------------------------------------------------------
+--NON-FX SURFACES---------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------
+
+newSurface = {
+  name         = "sera-mystique-wing_c",
+  texture0Name = "maps/heroes/seraphim/sets/mystique/c_sera-mystique-wing_d.tga",
+  texture1Name = "maps/heroes/seraphim/sets/mystique/c_sera-mystique-wing_sg.tga",
+  texture2Name = "maps/heroes/seraphim/sets/mystique/c_sera-mystique-wing_n.tga",
+  texture3Name = "maps/heroes/seraphim/sets/mystique/c_sera-mystique-wing_lx.tga",
+  flags        = SURFACE_FLAG_MASKED,
+  shader       = obj_d_s_b,
+}
+mgr.surfCreate(newSurface);
+
+newSurface = {
+  name         = "sera-sopor-wing_c",
+  texture0Name = "maps/heroes/seraphim/sets/sopor/c_sera-sopor-wing_d.tga",
+  texture1Name = "maps/heroes/seraphim/sets/sopor/c_sera-sopor-wing_sg.tga",
+  texture2Name = "maps/heroes/seraphim/sets/mystique/c_sera-mystique-wing_n.tga",
+  texture3Name = "maps/heroes/seraphim/sets/mystique/c_sera-mystique-wing_lx.tga",
+  flags        = SURFACE_FLAG_MASKED,
+  shader       = obj_crystal,
+}
+mgr.surfCreate(newSurface);
+
+--------------------------------------------------------------------------------------------------------------------------------
+--FX SURFACES-------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------
+
+--The following model is an incorrect explanation, but it helps understand what the textures do when trying to experiment:
+--texture0Name is the standard diffuse, the "basis"
+--texture1Name is for the T-Energy-Effect's background color
+--texture2Name is for the T-Energy-Effect's foreground color (the pulsing)
+--texture3Name is for the T-Energy-Effect's background animation. It has to be a Volume Map (3D texture)!
+
+--The following 2D textures are interesting, try to experiment:
+--texturexName = "fx/te_fx2.tga",
+--texturexName = "fx/te_fx.tga",
+--texturexName = "fx/gradients/gradient17.tga",
+--texturexName = "fx/blue.tga",
+--texturexName = "fx/tenergy_FXmask.tga",
+--texturexName = "fx/tenergy_dec.tga",
+
+--The following 3D textures are interesting, try to experiment:
+--texture3Name = "abs_noise3D.tga",
+--texture3Name = "filtered_noise3D.tga",
+--texture3Name = "brute_noise3D.tga",
+
+newSurface = {
+  name         = "sera-mystiquefx-wing_c",
+  texture0Name = "maps/heroes/seraphim/sets/mystique/c_sera-mystique-wing_fx.tga",
+  texture1Name = "fx/te_fx2.tga",
+  texture2Name = "fx/gradients/gradient17.tga",
+  texture3Name = "filtered_noise3D.tga",
+  flags        = SURFACE_FLAG_TRANSPARENT,
+  shader       = obj_fx_twings_for_mystique,
+}
+mgr.surfCreate(newSurface);
+
+newSurface = {
+  name         = "sera-soporfx-wing_c",
+  texture0Name = "maps/heroes/seraphim/sets/sopor/c_sera-sopor-wing_fx.tga",
+  texture1Name = "fx/te_fx2.tga",
+  texture2Name = "fx/gradients/gradient17.tga",
+  texture3Name = "filtered_noise3D.tga",
+  flags        = SURFACE_FLAG_TRANSPARENT,
+  shader       = obj_fx_twings_for_mystique,
+}
+mgr.surfCreate(newSurface);
