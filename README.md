@@ -49,11 +49,11 @@ Contains old scrapped shaders, mostly for documentation.
 
 ### Tangential, Principal and Binormal Vector:
 - [Definition](https://web.ma.utexas.edu/users/m408m/Display13-4-2.shtml)
-- [3D Plot](https://www.desmos.com/3d/komjer4eds?lang=de) (HIGHLY REGOMMENDED! Go check it out!)
+- [3D Plot](https://www.desmos.com/3d/gznomzuuxv) (HIGHLY REGOMMENDED! Go check it out!)
 
 ### Cantilever Beam (What is the curve of a hair under its own weight?)
 - [Definition and Formula](https://en.wikipedia.org/wiki/Deflection_(engineering)#Cantilever_beams)
-- [2D Plot](https://www.desmos.com/calculator/uze821sa1v?lang=de) (Worth to check it out!)
+- [2D Plot](https://www.desmos.com/calculator/vspssoash6) (Worth to check it out!)
 
 ### Rotating Vectors
 - [Rodrigues' rotation formula](https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula)
@@ -72,9 +72,9 @@ Contains old scrapped shaders, mostly for documentation.
 - [Clear Torrance Sparrow Confusion](https://computergraphics.stackexchange.com/questions/3946/correct-specular-term-of-the-cook-torrance-torrance-sparrow-model)
 - [Several Formulae](https://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html)
 - [Schlick's Approximation](https://en.wikipedia.org/wiki/Schlick%27s_approximation)
-- [Phong & Beckmann Distributions - 2D Plot](https://www.desmos.com/calculator/5ps4zarlrd?lang=de)
+- [Phong & Beckmann Distributions - 2D Plot](https://www.desmos.com/calculator/svanpzsptg)
 
 ## Plots (duplicates from above, just for QOL)
-- [3D Plot: Unit Vectors](https://www.desmos.com/3d/komjer4eds?lang=de)
-- [2D Plot: Cantilever Beam](https://www.desmos.com/calculator/uze821sa1v?lang=de)
-- [2D Plot: Phong & Beckmann Distribution](https://www.desmos.com/calculator/5ps4zarlrd?lang=de)
+- [3D Plot: Unit Vectors](https://www.desmos.com/3d/gznomzuuxv)
+- [2D Plot: Cantilever Beam](https://www.desmos.com/calculator/vspssoash6)
+- [2D Plot: Phong & Beckmann Distribution](https://www.desmos.com/calculator/svanpzsptg)
