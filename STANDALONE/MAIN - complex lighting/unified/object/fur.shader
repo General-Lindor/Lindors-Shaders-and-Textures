@@ -7,11 +7,22 @@
 
 #define ENABLE_VERTEX_LIGHTING
 #define VERTEX_LIGHTING_NRM
+
 #define OREN_NAYAR
 #ifdef PHONG
     #undef PHONG
 #endif
 #define TORRANCE_SPARROW
+
+// #ifdef OREN_NAYAR
+    // #undef OREN_NAYAR
+// #endif
+// #ifdef TORRANCE_SPARROW
+    // #undef TORRANCE_SPARROW
+// #endif
+// #define PHONG
+
+
 #include "lightingComplex.shader"
 
 // no fog in shader model 1
@@ -185,7 +196,8 @@ pixdata mainVS(
         #endif
 
         //roughness
-        float roughness = lerp(thickness, thickness / (1.0f + L), shell);
+        
+        float roughness = abs(thickness) / (1 + abs(S));
         O.roughness = saturate(roughness);
     #endif
     

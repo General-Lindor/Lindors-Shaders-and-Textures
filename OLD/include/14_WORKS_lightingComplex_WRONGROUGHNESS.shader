@@ -93,21 +93,13 @@ struct shaderContext {
     float C_COS;
     float C_TAN;
     float ROUGHNESS;
-    float ALPHA;
     float ALBEDO;
     float REFR_IDX;
 };
 
 float absdot(float3 first, float3 second) {
     return abs(dot(first, second));
-};
-
-float calcLightness(float3 color) {
-    float c_min = min(color.x, min(color.y, color.z));
-    float c_max = max(color.x, max(color.y, color.z));
-    float lightness = (c_min + c_max) * 0.5f;
-    return lightness;
-};
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DIFFUSE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,8 +141,7 @@ float calcOrenNayar(shaderContext context, float3 light_normal) {
     
     float both_cos = absdot(l_proj, c_proj) / (sqrt(absdot(l_proj, l_proj) * absdot(c_proj, c_proj)));
     
-    float sigma  = tan(context.ROUGHNESS * context.PI * 0.5f);
-    float r_scal = sigma * sigma;
+    float r_scal = context.ROUGHNESS * context.ROUGHNESS;
     float A_scal = 1.0f - (0.5f * (r_scal / (r_scal + 0.33f)));
     float B_scal = 0.45f * (r_scal / (r_scal + 0.09f));
     
@@ -176,10 +167,12 @@ float calcPhongBlinn(shaderContext context, float3 light_normal) {
     float h_cos = absdot(half_normal, context.NORMAL);
     
     float basis = h_cos;
-    float exponent = (2.0f / (context.ALPHA * context.ALPHA)) - 2.0f;
+    //float exponent = (1.0f - context.ROUGHNESS) / context.ROUGHNESS;
+    float exponent = context.ROUGHNESS / (1.0f - context.ROUGHNESS);
+    float normalization = (exponent + 2.0f) / (2.0f * context.PI);
     
     //calc
-    float specular = pow(basis, exponent);
+    float specular = normalization * (pow(basis, exponent));
     
     //out
     return specular;
@@ -195,10 +188,12 @@ float calcPhong(shaderContext context, float3 light_normal) {
     float l_cos = absdot(light_normal, context.NORMAL);
     
     float basis = absdot(context.CAMERA, ((2.0f * l_cos * context.NORMAL) - light_normal));
-    float exponent = (2.0f / (context.ALPHA * context.ALPHA)) - 2.0f;
+    //float exponent = (1.0f - context.ROUGHNESS) / context.ROUGHNESS;
+    float exponent = context.ROUGHNESS / (1.0f - context.ROUGHNESS);
+    float normalization = (exponent + 2.0f) / (2.0f * context.PI);
     
     // calc
-    float specular = pow(basis, exponent);
+    float specular = normalization * (pow(basis, exponent));
     
     // out
     return specular;
@@ -226,13 +221,15 @@ float calcFresnel(shaderContext context, float c_h_cos) {
 //Inverse of the Beckmann Distribution
 float calcBeckmannInverse(shaderContext context, float h_cos) {
     //setup
-    float m = (2.0f * context.ALPHA) / (1.0f + context.ALPHA);
+    //float m = (2.0f * context.ROUGHNESS) / (1.0f + context.ROUGHNESS);
+    float m = 2.0f * (1.0f - context.ROUGHNESS) / (2.0f - context.ROUGHNESS);
     
     float h_cos_sq = h_cos * h_cos;
     float h_cos_sq_sq = h_cos_sq * h_cos_sq;
     
     //calcuation
-    float exponent = (1.0f - h_cos_sq) / (h_cos_sq * context.ALPHA * context.ALPHA);
+    float exponent = (1.0f - h_cos_sq) / (h_cos_sq * m);
+    //float beckmannInverse = context.PI * m * h_cos_sq_sq * (pow(context.E, exponent));
     float beckmannInverse = h_cos_sq_sq * (pow(context.E, exponent));
     
     //out
@@ -266,11 +263,10 @@ float calcTorranceSparrow(shaderContext context, float3 light_normal) {
     //Denominator
     float beckmannInverse = calcBeckmannInverse(context, h_cos);
     //float denominator = 4.0f * beckmannInverse * context.C_COS * l_cos;
-    float denominator = 0.25f * beckmannInverse * ((1.0f + context.C_COS) * (1.0f + l_cos));
     
     //result
-    //float specular = numerator / beckmannInverse;
-    float specular = numerator / denominator;
+    //float specular = numerator / denominator;
+    float specular = numerator / beckmannInverse;
     
     //out
     return specular;
@@ -332,9 +328,7 @@ shaderContext constructContext(complexLightingData I) {
     //material properties
     context.REFR_IDX  = I.refr_idx;
     context.ROUGHNESS = I.roughness;
-    context.ALPHA     = I.roughness * I.roughness;
-    //context.ALBEDO    = I.albedo;
-    context.ALBEDO    = calcLightness(I.color);
+    context.ALBEDO    = (max(I.color.x, max(I.color.y, I.color.z)) + min(I.color.x, min(I.color.y, I.color.z))) * 0.5f;
     
     return context;
 };
@@ -441,14 +435,17 @@ colors calcComposeColors(coldata I) {
     //vertex component
     #ifdef ENABLE_VERTEX_LIGHTING
         #ifdef VERTEX_LIGHTING_NRM
-            float3 col_diff_hero   = I.diffuse_vertex * I.shadow * I.light_col_hero   * I.texBase.xyz;
-            float3 col_diff_vertex = I.diffuse_vertex * I.shadow * I.light_col_vertex * I.texBase.xyz;
+            float3 col_amb_hero    = I.ambient                    * I.light_col_amb    * I.texBase.xyz;
+            float3 col_amb_vertex  = I.ambient                    * I.light_col_amb    * I.texBase.xyz;
+        
+            float3 col_diff_hero   = I.diffuse_vertex  * I.shadow * I.light_col_hero   * I.texBase.xyz;
+            float3 col_diff_vertex = I.diffuse_vertex  * I.shadow * I.light_col_vertex * I.texBase.xyz;
             
             float3 col_spec_hero   = I.specular_vertex * I.shadow * I.light_col_hero;
             float3 col_spec_vertex = I.specular_vertex * I.shadow * I.light_col_vertex;
             
-            float3 col_mix_hero    = col_amb + col_diff_hero   + col_spec_hero;
-            float3 col_mix_vertex  = col_amb + col_diff_vertex + col_spec_vertex;
+            float3 col_mix_hero    = col_amb_hero   + col_diff_hero   + col_spec_hero;
+            float3 col_mix_vertex  = col_amb_vertex + col_diff_vertex + col_spec_vertex;
         #else
             float3 col_mix_hero   = min(I.ambient, I.shadow) * I.light_col_hero   * I.texBase.xyz;
             float3 col_mix_vertex = min(I.ambient, I.shadow) * I.light_col_vertex * I.texBase.xyz;
@@ -477,13 +474,13 @@ colors calcComposeColors(coldata I) {
         // float3 rgb_base  = colorSum * (len_max / len_sum);
         
         // Composition Model: Add, then normalize with max HSL lightness as lightness
-        float3 colorSum = col_mix + col_mix_hero + col_mix_vertex;
-        float l_std     = calcLightness(col_mix.xyz);
-        float l_hero    = calcLightness(col_mix_hero.xyz);
-        float l_vertex  = calcLightness(col_mix_vertex.xyz);
-        float l_max     = max(l_std, max(l_hero, l_vertex));
-        float l_sum     = calcLightness(colorSum.xyz);
-        float3 rgb_base = (l_max / l_sum) * colorSum;
+        float3 colorSum        = col_mix + col_mix_hero + col_mix_vertex;
+        float l_double_std     = min(col_mix.x, min(col_mix.y, col_mix.z)) + max(col_mix.x, max(col_mix.y, col_mix.z));
+        float l_double_hero    = min(col_mix_hero.x, min(col_mix_hero.y, col_mix_hero.z)) + max(col_mix_hero.x, max(col_mix_hero.y, col_mix_hero.z));
+        float l_double_vertex  = min(col_mix_vertex.x, min(col_mix_vertex.y, col_mix_vertex.z)) + max(col_mix_vertex.x, max(col_mix_vertex.y, col_mix_vertex.z));
+        float l_double_max     = max(l_double_std, max(l_double_hero, l_double_vertex));
+        float l_double_sum     = min(colorSum.x, min(colorSum.y, colorSum.z)) + max(colorSum.x, max(colorSum.y, colorSum.z));
+        float3 rgb_base        = (l_double_max / l_double_sum) * colorSum;
     #else
         float3 rgb_base = col_mix;
     #endif
