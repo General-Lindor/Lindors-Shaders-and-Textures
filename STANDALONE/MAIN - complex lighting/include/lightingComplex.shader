@@ -447,7 +447,7 @@ colors calcComposeColors(coldata I) {
     colors O;
     
     //standard component
-    float3 col_amb  = I.ambient             * I.light_col_amb  * I.texBase.xyz;
+    float3 col_amb  = I.ambient             * I.light_col_amb;
     float3 col_diff = I.diffuse  * I.shadow * I.light_col_diff * I.texBase.xyz;
     float3 col_spec = I.specular * I.shadow * I.light_col_diff;
     float3 col_mix = col_amb + col_diff + col_spec;
@@ -464,8 +464,8 @@ colors calcComposeColors(coldata I) {
             float3 col_mix_hero    = col_amb + col_diff_hero   + col_spec_hero;
             float3 col_mix_vertex  = col_amb + col_diff_vertex + col_spec_vertex;
         #else
-            float3 col_mix_hero   = min(I.ambient, I.shadow) * I.light_col_hero   * I.texBase.xyz;
-            float3 col_mix_vertex = min(I.ambient, I.shadow) * I.light_col_vertex * I.texBase.xyz;
+            float3 col_mix_hero   = min(I.ambient, I.shadow) * I.light_col_hero;
+            float3 col_mix_vertex = min(I.ambient, I.shadow) * I.light_col_vertex;
         #endif
     #endif
     
