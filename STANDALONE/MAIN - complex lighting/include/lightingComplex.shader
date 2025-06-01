@@ -113,15 +113,28 @@ float calcLightness(float3 color) {
 // DIFFUSE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////
-// LAMBERTIAN (DEFAULT) //
-//////////////////////////
+////////////////
+// LAMBERTIAN //
+////////////////
 
 //Diffuse Model: Lambertian
-float calcLambertian(shaderContext context, float3 light_normal) {
+// float calcLambertian(shaderContext context) {
+    // //calc
+    // float diffuse = context.C_COS;
+    
+    // //out
+    // return diffuse;
+// };
+
+///////////////////////////////
+// LOMMEL-SEELIGER (DEFAULT) //
+///////////////////////////////
+
+//Diffuse Model: Lambertian
+float calcLommelSeeliger(shaderContext context, float3 light_normal) {
     //calc
     float l_cos = absdot(context.NORMAL, light_normal);
-    float diffuse = context.ALBEDO * l_cos;
+    float diffuse = context.C_COS / (context.C_COS + l_cos);
     
     //out
     return diffuse;
@@ -154,7 +167,8 @@ float calcOrenNayar(shaderContext context, float3 light_normal) {
     float A_scal = 1.0f - (0.5f * (r_scal / (r_scal + 0.33f)));
     float B_scal = 0.45f * (r_scal / (r_scal + 0.09f));
     
-    float diffuse = context.ALBEDO * l_cos * (A_scal + (B_scal * max(0.0f, both_cos) * max(l_sin, context.C_SIN) * min(l_tan, context.C_TAN)));
+    //float diffuse = context.ALBEDO * l_cos * (A_scal + (B_scal * max(0.0f, both_cos) * max(l_sin, context.C_SIN) * min(l_tan, context.C_TAN)));
+    float diffuse = l_cos * (A_scal + (B_scal * max(0.0f, both_cos) * max(l_sin, context.C_SIN) * min(l_tan, context.C_TAN)));
     
     //out
     return diffuse;
@@ -352,7 +366,7 @@ lightingLevels calcLightingLevels(complexLightingData I) {
         float3 light_vertex_normal = normalize(I.v_dir_obj_nrm);
     #endif
     
-    //Ambient
+    //Ambient: Lambertian
     float out_ambient = context.ALBEDO * context.C_COS;
 
     //Diffuse
@@ -362,9 +376,9 @@ lightingLevels calcLightingLevels(complexLightingData I) {
             float out_diffuse_vertex = calcOrenNayar(context, light_vertex_normal);
         #endif
     #else
-        float out_diffuse = calcLambertian(context, light_normal);
+        float out_diffuse = calcLommelSeeliger(context, light_normal);
         #ifdef VERTEX_LIGHTING_NRM
-            float out_diffuse_vertex = calcLambertian(context, light_vertex_normal);
+            float out_diffuse_vertex = calcLommelSeeliger(context, light_vertex_normal);
         #endif
     #endif
 
